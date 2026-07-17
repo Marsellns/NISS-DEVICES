@@ -1,0 +1,9 @@
+.env
+media/
+__pycache__/
+*.pyc
+venv/
+/backend
+/frontend
+cloudflared-mqtt/credentials.json
+pi-tunnel-setup/credentials.json
