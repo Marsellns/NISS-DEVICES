@@ -231,6 +231,44 @@ def decrypt_json(payload_str):
     return json.loads(plaintext.decode("utf-8"))
 
 
+# ── Helper untuk enkripsi/dekripsi file (foto/video) ─────────────────────────
+
+def encrypt_file(filepath, key=None):
+    """Baca file dari disk, enkripsi isi-nya, return paket + JSON bytes.
+
+    Args:
+        filepath (str): Path ke file yang akan dienkripsi.
+        key (bytes, optional): AES key 16 byte. Default: key dari load_key().
+
+    Returns:
+        tuple: (packet_dict, json_bytes)
+            - packet_dict: dict {nonce_b64, ciphertext_b64, tag_b64}
+            - json_bytes: bytes JSON siap upload ke storage
+    """
+    with open(filepath, "rb") as f:
+        raw = f.read()
+    packet = encrypt_bytes(raw, key)
+    json_bytes = json.dumps(packet, separators=(",", ":")).encode("utf-8")
+    return packet, json_bytes
+
+
+def decrypt_file(json_bytes, key=None):
+    """Dekripsi JSON bytes (dari storage) kembali ke data file asli.
+
+    Args:
+        json_bytes (bytes): JSON bytes berisi {nonce_b64, ciphertext_b64, tag_b64}
+        key (bytes, optional): AES key 16 byte. Default: key dari load_key().
+
+    Returns:
+        bytes: Data file asli (plaintext).
+
+    Raises:
+        ValueError: Jika dekripsi gagal.
+    """
+    packet = json.loads(json_bytes)
+    return decrypt_bytes(packet, key)
+
+
 # ── Entry point untuk generate/cetak key secara manual ───────────────────────
 if __name__ == "__main__":
     print("=== NISS AES-128-GCM Key Utility ===\n")
